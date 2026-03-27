@@ -137,7 +137,7 @@ pipeline {
                         # Signer avec Cosign v3
                         COSIGN_PASSWORD="" cosign sign \
                           --key ${COSIGN_KEY_FILE} \
-                          --signing-config signing-config.json \
+                          --signing-config /usr/local/share/cosign/signing-config.json \
                           ${FULL_IMAGE}
 
                         echo "✅ Image signée et pushée : ${FULL_IMAGE}"
