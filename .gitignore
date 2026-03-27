@@ -3,3 +3,6 @@
 # Dossiers de données Harbor (souvent volumineux et contenant des secrets)
 devsecops/harbor/common/
 devsecops/harbor/data/
+devsecops/
+reports/
+cosign.key
