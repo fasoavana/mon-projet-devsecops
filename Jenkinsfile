@@ -97,14 +97,22 @@ pipeline {
 
                 stage('OWASP Dependency Check') {
                     steps {
-                        sh '''
-                            mkdir -p reports
-                            echo "OWASP scan désactivé - pas de connectivité NVD depuis ce réseau"
-                            echo "Pour l'activer: obtenir une NVD API key sur https://nvd.nist.gov/developers/request-an-api-key"
-                            echo "{\"skip\": \"no network access\"}" > reports/owasp-report.json
-                        '''
+                        withCredentials([string(credentialsId: 'nvd-api-key', variable: 'NVD_KEY')]) {
+                            sh '''
+                                mkdir -p reports
+                                docker run --rm \
+                                  -v $(pwd):/src \
+                                  -v $(pwd)/reports:/report \
+                                  owasp/dependency-check:latest \
+                                  --scan /src \
+                                  --format JSON \
+                                  --out /report/owasp-report.json \
+                                  --project "devsecops-demo" \
+                                  --nvdApiKey ${NVD_KEY} || true
+                            '''
+                        }
                     }
-                }
+                }                
             }
         }
 
