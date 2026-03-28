@@ -6,3 +6,4 @@ devsecops/harbor/data/
 devsecops/
 reports/
 cosign.key
+devsecops/harbor/harbor/common/
