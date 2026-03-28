@@ -7,3 +7,5 @@ devsecops/
 reports/
 cosign.key
 devsecops/harbor/harbor/common/
+devsecops/harbor/harbor/common/
+devsecops/harbor/harbor/harbor.yml
