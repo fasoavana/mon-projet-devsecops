@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        HARBOR_URL     = "192.168.88.1:9090"
+        HARBOR_URL     = "172.17.0.1:9090"
         HARBOR_PROJECT = "devsecops-project"
         IMAGE_NAME     = "fastapi-app"
         IMAGE_TAG      = "${BUILD_NUMBER}"
