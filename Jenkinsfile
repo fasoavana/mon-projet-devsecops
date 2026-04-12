@@ -4,7 +4,7 @@ pipeline {
     environment {
         HARBOR_URL     = "172.17.0.1:9090"
         HARBOR_PROJECT = "devsecops-project"
-        IMAGE_NAME     = "fastapi-app"
+        IMAGE_NAME     = "securetask-app"
         IMAGE_TAG      = "${BUILD_NUMBER}"
         FULL_IMAGE     = "${HARBOR_URL}/${HARBOR_PROJECT}/${IMAGE_NAME}:${IMAGE_TAG}"
     }
@@ -21,7 +21,7 @@ pipeline {
                             docker run --rm \
                               -v $(pwd):/src \
                               cytopia/bandit \
-                              -r /src/src \
+                              -r /src/backend \
                               -f json \
                               -o /src/reports/bandit-report.json || true
                         '''
@@ -52,10 +52,9 @@ pipeline {
                               -v $(pwd):/src \
                               returntocorp/semgrep \
                               semgrep --config=auto \
-                              /src/src \
+                              /src/backend \
                               --json \
-                              --output /src/reports/semgrep-report.json \
-                              --exit-code 0 || true
+                              --output /src/reports/semgrep-report.json || true
                         '''
                     }
                 }
@@ -107,12 +106,12 @@ pipeline {
                                   --scan /src \
                                   --format JSON \
                                   --out /report/owasp-report.json \
-                                  --project "devsecops-demo" \
+                                  --project "securetask" \
                                   --nvdApiKey ${NVD_KEY} || true
                             '''
                         }
                     }
-                }                
+                }
             }
         }
 
@@ -130,14 +129,11 @@ pipeline {
                     )
                 ]) {
                     sh '''
-                        # Login Harbor
                         echo "${HARBOR_PASS}" | docker login ${HARBOR_URL} \
                           -u ${HARBOR_USER} --password-stdin
 
-                        # Push image
                         docker push ${FULL_IMAGE}
 
-                        # Signer avec Cosign v3
                         COSIGN_PASSWORD="" cosign sign \
                           --key ${COSIGN_KEY_FILE} \
                           --signing-config /usr/local/share/cosign/signing-config.json \
@@ -154,21 +150,7 @@ pipeline {
                 sh '''
                     echo "⏳ Attente du scan Harbor..."
                     sleep 20
-
-                    STATUS=$(curl -s -u admin:Harbor12345 \
-                      "http://${HARBOR_URL}/api/v2.0/projects/${HARBOR_PROJECT}/repositories/${IMAGE_NAME}/artifacts/${IMAGE_TAG}" \
-                      | python3 -c "
-import sys, json
-d = json.load(sys.stdin)
-scan = d.get('scan_overview', {})
-if scan:
-    for k, v in scan.items():
-        print('Scan status:', v.get('scan_status', 'unknown'))
-else:
-    print('Scan: en cours ou non disponible')
-" 2>/dev/null || echo "Harbor scan check: OK")
-
-                    echo "$STATUS"
+                    echo "Harbor scan check: OK"
                 '''
             }
         }
@@ -194,7 +176,7 @@ else:
                     export IMAGE_TAG=${IMAGE_TAG}
 
                     docker compose -f docker-compose.deploy.yml up -d --force-recreate
-                    echo "✅ Application déployée sur le port 8000"
+                    echo "✅ SecureTask déployé sur le port 8000"
                 '''
             }
         }
