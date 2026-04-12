@@ -169,15 +169,19 @@ pipeline {
 
         stage('Deploy with Docker Compose') {
             steps {
-                sh '''
-                    export HARBOR_URL=${HARBOR_URL}
-                    export HARBOR_PROJECT=${HARBOR_PROJECT}
-                    export IMAGE_NAME=${IMAGE_NAME}
-                    export IMAGE_TAG=${IMAGE_TAG}
+                withCredentials([file(credentialsId: 'securetask-env', variable: 'ENV_FILE')]) {
+                    sh '''
+                        export HARBOR_URL=${HARBOR_URL}
+                        export HARBOR_PROJECT=${HARBOR_PROJECT}
+                        export IMAGE_NAME=${IMAGE_NAME}
+                        export IMAGE_TAG=${IMAGE_TAG}
 
-                    docker compose -f docker-compose.deploy.yml up -d --force-recreate
-                    echo "✅ SecureTask déployé sur le port 8000"
-                '''
+                        cp ${ENV_FILE} .env
+
+                        docker compose -f docker-compose.deploy.yml up -d --force-recreate
+                        echo "✅ SecureTask déployé sur le port 8000"
+                    '''
+                }
             }
         }
     }
