@@ -7,6 +7,7 @@ pipeline {
         IMAGE_NAME     = "securetask-app"
         IMAGE_TAG      = "${BUILD_NUMBER}"
         FULL_IMAGE     = "${HARBOR_URL}/${HARBOR_PROJECT}/${IMAGE_NAME}:${IMAGE_TAG}"
+        SONAR_HOST_URL = "http://172.17.0.1:9000"
     }
 
     stages {
@@ -61,6 +62,25 @@ pipeline {
             }
         }
 
+        stage('SonarQube Analysis') {
+            steps {
+                sh '''
+                    docker run --rm \
+                      -v $(pwd):/usr/src \
+                      sonarsource/sonar-scanner-cli:latest \
+                      -Dsonar.host.url=${SONAR_HOST_URL} \
+                      -Dsonar.login=squ_6d1e0b885b9e4d4e4de3310c653c09e23c8dc9fe \
+                      -Dsonar.projectKey=securetask \
+                      -Dsonar.projectName=SecureTask \
+                      -Dsonar.projectVersion=${BUILD_NUMBER} \
+                      -Dsonar.sources=/usr/src/backend \
+                      -Dsonar.exclusions=/usr/src/backend/tests/**,/usr/src/backend/static/** \
+                      -Dsonar.python.version=3 \
+                      -Dsonar.qualitygate.wait=true
+                '''
+            }
+        }
+
         stage('Build Docker Image') {
             steps {
                 sh '''
@@ -103,7 +123,7 @@ pipeline {
                                   -v $(pwd):/src \
                                   -v $(pwd)/reports:/report \
                                   owasp/dependency-check:latest \
-                                  --scan /src \
+                                  --scan /src/backend \
                                   --format JSON \
                                   --out /report/owasp-report.json \
                                   --project "securetask" \
@@ -112,6 +132,28 @@ pipeline {
                         }
                     }
                 }
+
+                stage('Safety (Python Dependencies)') {
+                    steps {
+                        sh '''
+                            docker run --rm \
+                              -v $(pwd)/backend:/app \
+                              python:3.11-slim \
+                              bash -c "pip install safety && safety check -r /app/requirements.txt --json > /app/../reports/safety.json" || true
+                        '''
+                    }
+                }
+            }
+        }
+
+        stage('Generate SBOM') {
+            steps {
+                sh '''
+                    docker run --rm \
+                      -v $(pwd):/src \
+                      anchore/syft:latest \
+                      /src -o json > reports/sbom.json
+                '''
             }
         }
 
@@ -136,7 +178,6 @@ pipeline {
 
                         COSIGN_PASSWORD="" cosign sign \
                           --key ${COSIGN_KEY_FILE} \
-                          --signing-config /usr/local/share/cosign/signing-config.json \
                           ${FULL_IMAGE}
 
                         echo "✅ Image signée et pushée : ${FULL_IMAGE}"
