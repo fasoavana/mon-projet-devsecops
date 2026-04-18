@@ -138,7 +138,7 @@ pipeline {
                             docker run --rm \
                               -v $(pwd)/backend:/app \
                               python:3.11-slim \
-                              bash -c "pip install safety && safety check -r /app/requirements.txt --json > /app/../reports/safety.json" || true
+                              bash -c "mkdir -p /app/../reports && pip install safety && safety check -r /app/requirements.txt --json > /app/../reports/safety.json" || true
                         '''
                     }
                 }
@@ -215,7 +215,14 @@ pipeline {
                     export IMAGE_NAME=${IMAGE_NAME}
                     export IMAGE_TAG=${IMAGE_TAG}
 
-                    docker-compose -f docker-compose.deploy.yml up -d --force-recreate
+                    # Utiliser docker run pour exécuter docker-compose sur l'hôte
+                    docker run --rm \
+                      -v /var/run/docker.sock:/var/run/docker.sock \
+                      -v $(pwd):/app \
+                      -w /app \
+                      docker/compose:1.29.2 \
+                      -f docker-compose.deploy.yml up -d --force-recreate
+
                     echo "✅ SecureTask déployé sur le port 8000"
                 '''
             }
