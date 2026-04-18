@@ -215,7 +215,7 @@ pipeline {
                     export IMAGE_NAME=${IMAGE_NAME}
                     export IMAGE_TAG=${IMAGE_TAG}
 
-                    docker compose -f docker-compose.deploy.yml up -d --force-recreate
+                    docker-compose -f docker-compose.deploy.yml up -d --force-recreate
                     echo "✅ SecureTask déployé sur le port 8000"
                 '''
             }
