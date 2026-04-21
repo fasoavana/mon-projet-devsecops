@@ -221,7 +221,7 @@ pipeline {
                       -v $(pwd):/app \
                       -w /app \
                       docker/compose:1.29.2 \
-                      -f docker-compose.deploy.yml up -d --force-recreate
+                      -f /app/docker-compose.deploy.yml up -d --force-recreate
 
                     echo "✅ SecureTask déployé sur le port 8000"
                 '''
