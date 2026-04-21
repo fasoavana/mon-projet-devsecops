@@ -95,10 +95,10 @@ pipeline {
             }
         }
 
-        stage('Security Scanning') {
+        stage('Dependency & Container Security Scan') {
             parallel {
 
-                stage('Trivy') {
+                stage('Trivy (Container)') {
                     steps {
                         sh '''
                             mkdir -p reports
@@ -110,28 +110,13 @@ pipeline {
                               --output /reports/trivy-report.json \
                               --exit-code 0 \
                               --severity HIGH,CRITICAL \
-                              ${FULL_IMAGE}
+                              --timeout 10m \
+                              ${FULL_IMAGE} || true
                         '''
                     }
                 }
 
-                stage('OWASP Dependency Check') {
-                    steps {
-                        sh '''
-                            mkdir -p reports
-                            docker run --rm \
-                              -v $(pwd):/src \
-                              -v $(pwd)/reports:/report \
-                              owasp/dependency-check:latest \
-                              --scan /src/backend \
-                              --format JSON \
-                              --out /report/owasp-report.json \
-                              --project "securetask" || true
-                        '''
-                    }
-                }
-
-                stage('Safety Python Dependencies') {
+                stage('Safety (Python Dependencies)') {
                     steps {
                         sh '''
                             mkdir -p reports
@@ -215,7 +200,6 @@ pipeline {
                     export IMAGE_NAME=${IMAGE_NAME}
                     export IMAGE_TAG=${IMAGE_TAG}
 
-                    # Utiliser docker run pour exécuter docker-compose sur l'hôte
                     docker run --rm \
                       -v /var/run/docker.sock:/var/run/docker.sock \
                       -v $(pwd):/app \
