@@ -51,7 +51,7 @@ pipeline {
                       -Dsonar.projectKey=securetask \
                       -Dsonar.projectName=SecureTask \
                       -Dsonar.projectVersion=${BUILD_NUMBER} \
-                      -Dsonar.sources=/usr/src \
+                      -Dsonar.sources=/usr/src/backend -Dsonar.projectBaseDir=/usr/src \
                       -Dsonar.exclusions=/usr/src/backend/tests/**,/usr/src/backend/static/**,/usr/src/frontend/** \
                       -Dsonar.python.version=3 || true
                 '''
