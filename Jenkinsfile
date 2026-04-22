@@ -133,16 +133,6 @@ pipeline {
             }
         }
 
-        stage('Harbor Policy Check') {
-            steps {
-                sh '''
-                    echo "Waiting for Harbor scan..."
-                    sleep 10
-                    echo "Harbor policies OK"
-                '''
-            }
-        }
-
         stage('Deploy') {
             steps {
                 sh '''
@@ -168,7 +158,7 @@ pipeline {
             echo "Reports archived"
         }
         success {
-            echo "✅ PIPELINE 100% SUCCESS - Image: ${FULL_IMAGE}"
+            echo "✅ PIPELINE SUCCESS - Image: ${FULL_IMAGE}"
         }
         failure {
             echo "❌ Pipeline failed - Check logs"
