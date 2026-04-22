@@ -1,24 +1,26 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+import models, database
+from routes import user, reservation
 
-app = FastAPI(title="SecureTask API", version="1.0.0")
+# Création des tables dans la base de données
+models.Base.metadata.create_all(bind=database.engine)
 
+app = FastAPI(title="Secure Reservation App API")
+
+# Configuration CORS pour permettre au frontend d'appeler l'API
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["*"], # En production, spécifier l'URL du frontend
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
+# Inclusion des routes
+app.include_router(user.router, tags=["Users"])
+app.include_router(reservation.router, prefix="/reservations", tags=["Reservations"])
+
 @app.get("/")
-async def root():
-    return {"message": "SecureTask API is running!"}
-
-@app.get("/api/v1/health")
-async def health():
-    return {"status": "healthy"}
-
-@app.get("/api/v1/users")
-async def get_users():
-    return [{"id": 1, "name": "Admin"}]
+def read_root():
+    return {"message": "Welcome to Secure Reservation App API"}

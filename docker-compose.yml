@@ -47,7 +47,7 @@ services:
       - POSTGRES_DB=securetask_db
       - REDIS_HOST=redis
     volumes:
-      - ./backend_new:/app
+      - ./backend:/app
     networks:
       - app-network
 
@@ -57,3 +57,12 @@ volumes:
 networks:
   app-network:
     driver: bridge
+
+  frontend:
+    image: nginx:alpine
+    ports:
+      - "8080:80"
+    volumes:
+      - ./frontend:/usr/share/nginx/html
+    networks:
+      - app-network
