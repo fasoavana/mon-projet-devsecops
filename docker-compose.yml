@@ -51,18 +51,18 @@ services:
     networks:
       - app-network
 
+  frontend:
+    image: nginx:alpine
+    ports:
+      - "3000:80"
+    volumes:
+      - ./frontend:/usr/share/nginx/html
+    networks:
+      - app-network
+
 volumes:
   postgres_data:
 
 networks:
   app-network:
     driver: bridge
-
-  frontend:
-    image: nginx:alpine
-    ports:
-      - "8080:80"
-    volumes:
-      - ./frontend:/usr/share/nginx/html
-    networks:
-      - app-network
