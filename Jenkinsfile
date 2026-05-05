@@ -51,7 +51,12 @@ pipeline {
                       -v $(pwd)/sonar-project.properties:/usr/src/sonar-project.properties \
                       sonarsource/sonar-scanner-cli:latest \
                       -Dsonar.host.url=${SONAR_HOST_URL} \
-                      -Dsonar.token=${SONAR_TOKEN}
+                      -Dsonar.token=${SONAR_TOKEN} \
+                      -Dsonar.projectKey=securetask \
+                      -Dsonar.projectName=SecureTask \
+                      -Dsonar.sources=/usr/src/backend,/usr/src/frontend \
+                      -Dsonar.python.version=3 \
+                      -Dsonar.javascript.file.suffixes=js
                 '''
             }
         }
