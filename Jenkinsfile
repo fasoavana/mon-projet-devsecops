@@ -54,7 +54,7 @@ pipeline {
                       -Dsonar.token=${SONAR_TOKEN} \
                       -Dsonar.projectKey=securetask \
                       -Dsonar.projectName=SecureTask \
-                      -Dsonar.sources=/usr/src/backend,/usr/src/frontend \
+                      -Dsonar.sources=backend,frontend \
                       -Dsonar.python.version=3 \
                       -Dsonar.javascript.file.suffixes=js
                 '''
