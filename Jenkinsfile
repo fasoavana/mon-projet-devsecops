@@ -8,7 +8,7 @@ pipeline {
         IMAGE_TAG      = "${BUILD_NUMBER}"
         FULL_IMAGE     = "${HARBOR_URL}/${HARBOR_PROJECT}/${IMAGE_NAME}:${IMAGE_TAG}"
         SONAR_HOST_URL = "http://172.17.0.1:9000"
-        SONAR_TOKEN    = "squ_6d1e0b885b9e4d4e4de3310c653c09e23c8dc9fe"
+        SONAR_TOKEN    = credentials('sonar-token')
     }
 
     stages {
@@ -45,15 +45,13 @@ pipeline {
         stage('SonarQube Analysis') {
             steps {
                 sh '''
-                    docker run --rm -v $(pwd):/usr/src sonarsource/sonar-scanner-cli:latest \
+                    docker run --rm \
+                      -v $(pwd)/backend:/usr/src/backend \
+                      -v $(pwd)/frontend:/usr/src/frontend \
+                      -v $(pwd)/sonar-project.properties:/usr/src/sonar-project.properties \
+                      sonarsource/sonar-scanner-cli:latest \
                       -Dsonar.host.url=${SONAR_HOST_URL} \
-                      -Dsonar.login=${SONAR_TOKEN} \
-                      -Dsonar.projectKey=securetask \
-                      -Dsonar.projectName=SecureTask \
-                      -Dsonar.projectVersion=${BUILD_NUMBER} \
-                      -Dsonar.sources=/usr/src/backend -Dsonar.projectBaseDir=/usr/src \
-                      -Dsonar.exclusions=/usr/src/backend/tests/**,/usr/src/backend/static/**,/usr/src/frontend/** \
-                      -Dsonar.python.version=3 || true
+                      -Dsonar.token=${SONAR_TOKEN}
                 '''
             }
         }
