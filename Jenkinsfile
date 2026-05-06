@@ -47,16 +47,9 @@ pipeline {
                 sh '''
                     docker run --rm \
                       -v $(pwd):/usr/src \
-                      --user $(id -u):$(id -g) \
                       sonarsource/sonar-scanner-cli:latest \
                       -Dsonar.host.url=${SONAR_HOST_URL} \
-                      -Dsonar.token=${SONAR_TOKEN} \
-                      -Dsonar.projectKey=securetask \
-                      -Dsonar.projectName=SecureTask \
-                      -Dsonar.sources=backend,frontend \
-                      -Dsonar.python.version=3 \
-                      -Dsonar.javascript.file.suffixes=js \
-                      -Dsonar.exclusions=**/devsecops/**,**/__pycache__/**,**/*.pyc,**/venv/**,**/env/**
+                      -Dsonar.token=${SONAR_TOKEN}
                 '''
             }
         }
