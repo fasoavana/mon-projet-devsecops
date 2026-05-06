@@ -45,11 +45,20 @@ pipeline {
         stage('SonarQube Analysis') {
             steps {
                 sh '''
+                    mkdir -p /tmp/sonar-src
+                    cp -r $(pwd)/backend /tmp/sonar-src/
+                    cp -r $(pwd)/frontend /tmp/sonar-src/
                     docker run --rm \
-                      -v $(pwd):/usr/src \
+                      -v /tmp/sonar-src:/usr/src \
                       sonarsource/sonar-scanner-cli:latest \
                       -Dsonar.host.url=${SONAR_HOST_URL} \
-                      -Dsonar.token=${SONAR_TOKEN}
+                      -Dsonar.token=${SONAR_TOKEN} \
+                      -Dsonar.projectKey=securetask \
+                      -Dsonar.projectName=SecureTask \
+                      -Dsonar.sources=backend,frontend \
+                      -Dsonar.python.version=3 \
+                      -Dsonar.javascript.file.suffixes=js
+                    rm -rf /tmp/sonar-src
                 '''
             }
         }
