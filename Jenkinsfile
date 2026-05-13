@@ -45,9 +45,10 @@ pipeline {
         stage('SonarQube Analysis') {
             steps {
                 sh '''
-                    mkdir -p /tmp/sonar-src
-                    cp -r $(pwd)/backend /tmp/sonar-src/
-                    cp -r $(pwd)/frontend /tmp/sonar-src/
+                    mkdir -p /tmp/sonar-src/backend
+                    mkdir -p /tmp/sonar-src/frontend
+                    cp -r $(pwd)/backend/* /tmp/sonar-src/backend/
+                    cp -r $(pwd)/frontend/* /tmp/sonar-src/frontend/
                     docker run --rm \
                       -v /tmp/sonar-src:/usr/src \
                       sonarsource/sonar-scanner-cli:latest \
@@ -55,9 +56,10 @@ pipeline {
                       -Dsonar.token=${SONAR_TOKEN} \
                       -Dsonar.projectKey=securetask \
                       -Dsonar.projectName=SecureTask \
-                      -Dsonar.sources=backend,frontend \
+                      -Dsonar.sources=/usr/src/backend,/usr/src/frontend \
                       -Dsonar.python.version=3 \
-                      -Dsonar.javascript.file.suffixes=js
+                      -Dsonar.javascript.file.suffixes=js \
+                      -Dsonar.exclusions=**/__pycache__/**,**/*.pyc,**/venv/**,**/node_modules/**
                     rm -rf /tmp/sonar-src
                 '''
             }
