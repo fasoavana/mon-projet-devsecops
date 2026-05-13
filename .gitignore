@@ -9,3 +9,16 @@ cosign.key
 devsecops/harbor/harbor/common/
 devsecops/harbor/harbor/common/
 devsecops/harbor/harbor/harbor.yml
+# Python
+**/__pycache__/
+**/*.pyc
+**/venv/
+**/*.db
+**/scratch/
+
+# Node
+**/node_modules/
+**/dist/
+
+# Env
+**/.env

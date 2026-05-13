@@ -25,9 +25,11 @@ def get_reservations(
     db: Session = Depends(database.get_db),
     current_user: models.User = Depends(auth.get_current_user)
 ):
-    if current_user.role == "admin":
-        return db.query(models.Reservation).all()
-    return db.query(models.Reservation).filter(models.Reservation.user_id == current_user.id).all()
+    query = db.query(models.Reservation)
+    if current_user.role != "admin":
+        query = query.filter(models.Reservation.user_id == current_user.id)
+    
+    return query.order_by(models.Reservation.date.desc(), models.Reservation.time.desc()).all()
 
 @router.put("/{reservation_id}", response_model=schemas.Reservation)
 def update_reservation(
