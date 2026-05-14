@@ -45,13 +45,15 @@ pipeline {
         stage('SonarQube Analysis') {
             steps {
                 sh '''
-                    SONAR_TMP=/tmp/sonar-src-$(date +%s)
-                    rm -rf $SONAR_TMP
-                    mkdir -p $SONAR_TMP
-                    cp -r $(pwd)/backend $SONAR_TMP/
-                    cp -r $(pwd)/frontend $SONAR_TMP/
                     docker run --rm \
-                      -v $SONAR_TMP:/usr/src \
+                      -v sonar-src:/sonar-src \
+                      --entrypoint sh \
+                      sonarsource/sonar-scanner-cli:latest \
+                      -c "rm -rf /sonar-src/* && mkdir -p /sonar-src/backend /sonar-src/frontend/src"
+                    cp -r $(pwd)/backend/. /sonar-src/backend/
+                    cp -r $(pwd)/frontend/src/. /sonar-src/frontend/src/
+                    docker run --rm \
+                      -v sonar-src:/usr/src \
                       sonarsource/sonar-scanner-cli:latest \
                       -Dsonar.host.url=${SONAR_HOST_URL} \
                       -Dsonar.token=${SONAR_TOKEN} \
@@ -61,10 +63,10 @@ pipeline {
                       -Dsonar.python.version=3 \
                       -Dsonar.javascript.file.suffixes=js,jsx \
                       -Dsonar.exclusions=**/__pycache__/**,**/*.pyc,**/venv/**,**/node_modules/**,**/dist/**,**/scratch/**,**/*.db
-                    rm -rf $SONAR_TMP
                 '''
             }
         }
+
 
         stage('Build Docker Image') {
             steps {
