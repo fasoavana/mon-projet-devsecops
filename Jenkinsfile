@@ -45,7 +45,7 @@ pipeline {
         stage('SonarQube Analysis') {
             steps {
                 sh '''
-                    SONAR_TMP=$(pwd | sed 's|/var/jenkins_home|/home/faso/jenkins_data|')/sonar-tmp
+                    SONAR_TMP=/home/faso/jenkins_data/workspace/devsecops-pipeline/sonar-tmp
                     rm -rf $SONAR_TMP
                     mkdir -p $SONAR_TMP
                     cp -r $(pwd)/backend $SONAR_TMP/
